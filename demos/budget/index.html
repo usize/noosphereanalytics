@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Interactive Category Report</title>
+  <style>
+    :root { --gap: 12px; }
+    body { font-family: system-ui, Arial, sans-serif; margin:0; padding:var(--gap); }
+    h1,h2 { text-align:center; margin:.5em 0; }
+    #chartContainer, .cloneChart { width:100%; max-width:450px; margin:0 auto; }
+    canvas { width:100%!important; height:auto!important; display:block; }
+    #controls { display:flex; flex-wrap:wrap; gap:var(--gap); justify-content:center; margin:1em 0; }
+    button { padding:.4em .8em; font-size:.9em; cursor:pointer; }
+    .table-wrap { overflow-x:auto; }
+    table { border-collapse:collapse; width:100%; min-width:650px; }
+    th,td { border:1px solid #ccc; padding:6px 8px; text-align:left; }
+    th { background:#f4f4f4; }
+    .hidden { display:none; }
+    #queryInfo { max-width:900px; margin:.5em auto 1.5em; line-height:1.4; }
+    #queryInfo strong{display:inline-block; min-width:5.2em;}
+    /* clone area */
+    #clones { margin-top:2em; }
+    .cloneBox { border:1px solid #ddd; padding:var(--gap); margin-bottom:var(--gap); position:relative; }
+    .cloneBox button { position:absolute; right:var(--gap); top:var(--gap); }
+    .cloneLabel { font-size:.85em; margin-bottom:.5em; text-align:center; }
+	/* --- tool-tips ----------------------------------------------------------- */
+	[data-tip] { position: relative; }
+	[data-tip]::after {
+	  content: attr(data-tip);
+	  position: absolute;
+	  left: 50%; bottom: calc(100% + 6px);
+	  transform: translateX(-50%);
+	  background: #333; color: #fff; font-size: .75em;
+	  padding: 4px 6px; border-radius: 4px; white-space: nowrap;
+	  opacity: 0; pointer-events: none; transition: opacity .15s;
+	}
+	[data-tip]:hover::after { opacity: 1; }
+	/* ── Executive‑summary styling ─────────────────────────────── */
+	.execSummary{
+	  max-width:900px;        /* same width as queryInfo */
+	  margin:1.6em auto;
+	  font-size:0.95rem;
+	  line-height:1.55;
+	  text-align:justify;     /* nicer paragraph shape */
+	}
+	.execSummary p{ margin:0 0 1em; }  /* space between paragraphs */
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Category Breakdown</h1>
+
+  <div id="queryInfo">
+    <p>
+      This interactive chart explores how Washington State school districts discussed budget planning in public meetings from
+      <strong>January&nbsp;1,&nbsp;2024</strong>, to <strong>April&nbsp;24,&nbsp;2025</strong>.
+    </p>
+  </div>
+
+  <!-- ── controls ──────────────────────────────── -->
+	<div id="controls">
+	  <label data-tip="Filter records on or after this date">
+		Start <input type="date" id="startDate">
+	  </label>
+
+	  <label data-tip="Filter records on or before this date">
+		End <input type="date" id="endDate">
+	  </label>
+
+	  <button id="rollupButton"
+			  data-tip="Toggle between detailed counts and one overall category per district (tie means there was no overall winner)">
+		Switch&nbsp;to&nbsp;Overall&nbsp;View
+	  </button>
+
+	  <button id="cloneButton"
+			  data-tip="Make a frozen copy of the current chart (date range, view &amp; filters)">
+		Clone&nbsp;view
+	  </button>
+
+	  <button id="applyFilter"
+			  data-tip="Apply the selected date range">
+		Apply
+	  </button>
+
+	  <button id="clearFilter"
+			  data-tip="Clear date range, view and category filters">
+		Clear
+	  </button>
+
+	  <button id="resetCategory" class="hidden"
+			  data-tip="Remove the category slice filter">
+		Reset&nbsp;Category&nbsp;Filter
+	  </button>
+	</div>
+
+  <!-- ── main chart ─────────────────────────────── -->
+  <div id="chartContainer">
+    <canvas id="pieChart"></canvas>
+    <br><center><i>click a slice to filter the detail table</i></center>
+  </div>
+  <!-- container for clones -->
+  <div id="clones"></div>
+
+	<h2>Executive Summary</h2>
+	<div class="execSummary">
+	  <p>Throughout 2024, school districts across Washington State were heavily engaged in planning for and implementing <strong>significant budget reductions for the 2024‑25 school year</strong>, largely in response to the expiration of federal ESSER funds and ongoing enrollment declines. <a href="#ent-blaine_school_district">Blaine School District</a>
+, for example, acknowledged the need for “significant budget reductions in the coming school year” in January 2024 (2024‑01‑22), and later estimated that “$2.7 million will be needed” in reductions for 2024‑2025, emphasizing the crucial role of the local levy (2024‑02‑20). <a href="#ent-washougal_school_district">Washougal School District</a>
+ similarly stated in January 2024 their requirement for “$3 million in reductions for the 2024‑25 school year” (2024‑01‑23). <a href="#ent-puyallup_school_district">Puyallup School District</a>
+’s board directed the superintendent in February 2024 to make reductions to develop a balanced budget for 2024‑25 (2024‑02‑20). This period was marked by concrete steps to address anticipated deficits, including identifying positions previously covered by ESSER funding that would need to shift to local sources or be eliminated, as seen in <a href="#ent-clarkston_school_district">Clarkston School District</a>
+ in August 2024 (2024‑08‑26). Some districts were also operationalising spending controls, such as budget freezes for the 2024‑25 fiscal year (<a href="#ent-pasco_school_district">Pasco School District</a>
+, 2025‑03‑11; 2025‑02‑25).</p>
+
+	  <p>As the calendar turned to 2025 and the focus shifted towards planning for the 2025‑26 school year, the landscape remained fiscally constrained. Districts continued to grapple with the impacts of rising operational costs and uncertainty regarding state funding levels. <a href="#ent-renton_school_district">Renton School District</a>
+’s budget planning for 2025‑26 in March 2025 included proposed total reductions to ensure financial stability (2025‑03‑26). <a href="#ent-dieringer_school_district">Dieringer School District</a>
+ reviewed their preliminary 2025‑26 budget calculations in January 2025, which showed “a need to reduce expenditures by 1.6 million in order to build a balanced budget” (2025‑01‑27). Concerns about insufficient state funding for areas like Special Education and Maintenance, Supplies, and Operating Costs (MSOC) persisted into 2025 discussions (<a href="#ent-edmonds_school_district">Edmonds School District</a>
+, 2025‑03‑25; <a href="#ent-puyallup_school_district">Puyallup School District</a>
+, 2024‑02‑05). <a href="#ent-edmonds_school_district">Edmonds School District</a>
+ noted in March 2025 that they were considering “extreme cuts… due to insufficient funding” (2025‑03‑11). The long‑term trend of declining enrollment, a statewide phenomenon since 2019‑20 (<a href="#ent-clarkston_school_district">Clarkston School District</a>
+, 2024‑08‑26), continued to inform staffing and budget adjustments for 2025‑26 (<a href="#ent-pasco_school_district">Pasco School District</a>
+, 2025‑02‑25). Planning for local levies remained a critical component of future revenue strategies (<a href="#ent-pasco_school_district">Pasco School District</a>
+, 2025‑02‑25).</p>
+
+	  <p><strong>In summary,</strong> the transition from planning for 2024‑25 to forecasting for 2025‑26 highlights a continuity of significant fiscal pressure on school districts. While 2024 saw districts finalising and implementing specific reduction plans driven by immediate challenges like ESSER expiration and realised enrollment drops, 2025 discussions reveal that these pressures are expected to continue, requiring ongoing efforts to manage expenditures, address rising costs, and navigate the uncertainties of state funding and local levy capacity.</p>
+	</div>
+  <div class="table-wrap">
+    <table id="summaryTable">
+      <thead><tr><th>Category</th><th>Count</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- overall-per-entity table (only in roll-up) -->
+  <h2 id="entityTitle" class="hidden">Overall Category per Entity</h2>
+  <div id="entityWrap" class="table-wrap hidden">
+    <table id="entityTable">
+      <thead><tr><th>Entity</th><th>Overall Category</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <h2>Dataset</h2>
+  <div class="table-wrap">
+    <table id="detailTable">
+      <thead>
+        <tr><th>Date</th><th>State</th><th>County</th><th>Entity</th>
+            <th>Category</th><th>Snippet</th><th>LLM Reasoning</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+<script>
+/* ========= Globals & main chart ========= */
+let originalDetails = [], currentCategoryFilter = null, rollupMode = false;
+const palette = ['#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f',
+                 '#edc949','#af7aa1','#ff9da7','#9c755f','#bab0ab'];
+const catColor = {};         // category → fixed colour
+
+const ctx = document.getElementById('pieChart').getContext('2d');
+const pieChart = new Chart(ctx, { type:'pie',
+  data:{ labels:[], datasets:[{ data:[], backgroundColor:[] }]},
+  options:{ onClick(evt){
+      const pts = pieChart.getElementsAtEventForMode(evt,'nearest',{intersect:true},true);
+      if(!pts.length) return;
+      currentCategoryFilter = pieChart.data.labels[pts[0].index];
+      document.getElementById('resetCategory').classList.remove('hidden');
+      render();
+  }}
+});
+
+/* ========= Data load ========= */
+(async () => {
+  const res = await fetch('data.json');
+  originalDetails = await res.json();
+
+  // build consistent colour map
+  const cats = new Set(originalDetails.map(r=>r.category));
+  rollupByEntity(originalDetails).forEach(r=>cats.add(r.category));
+  [...cats].sort().forEach((c,i)=>catColor[c] = palette[i%palette.length]);
+
+  render();
+})();
+
+/* ========= Helpers ========= */
+/* ---------- helper: turn a name into /entity-reports/... link ---------- */
+function entityLink(name){
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
+  return `<a href="/entity-reports/${slug}-report.html" target="_blank">${name}</a>`;
+}
+function filterByDate(recs){
+  const s = document.getElementById('startDate').value;
+  const e = document.getElementById('endDate').value;
+  return recs.filter(r => (!s || r.date>=s) && (!e || r.date<=e));
+}
+/* ---------- roll‑up that SUMS confidences per entity ---------- */
+function rollupByEntity(recs){
+  // entity → { cat:{score:Σscore , n:count } }
+  const by = Object.create(null);
+
+  recs.forEach(r=>{
+    const ent = r.entity, cat = r.category, s = Number(r.score)||0;
+    if(!by[ent]) by[ent] = Object.create(null);
+    if(!by[ent][cat]) by[ent][cat] = {score:0, n:0};
+    by[ent][cat].score += s;
+    by[ent][cat].n     += 1;
+  });
+
+  const out = [];
+  for(const [entity, cats] of Object.entries(by)){
+    const sorted = Object.entries(cats).sort((a,b)=>{
+      // primary: total score  (desc)
+      if(b[1].score !== a[1].score) return b[1].score - a[1].score;
+      // secondary: number of snippets (desc)
+      if(b[1].n     !== a[1].n    ) return b[1].n     - a[1].n;
+      // tertiary: lexical order to keep result stable
+      return a[0].localeCompare(b[0]);
+    });
+
+    if(sorted.length > 1 &&
+       sorted[0][1].score === sorted[1][1].score &&
+       sorted[0][1].n     === sorted[1][1].n){
+      out.push({entity, category:'tie'});
+    }else{
+      out.push({entity, category:sorted[0][0]});
+    }
+  }
+  return out;
+}
+function categoryCounts(recs){
+  const cnt = {};
+  if(rollupMode){
+    rollupByEntity(recs).forEach(r=>cnt[r.category]=(cnt[r.category]||0)+1);
+  }else{
+    recs.forEach(r=>{
+      if(currentCategoryFilter && r.category!==currentCategoryFilter) return;
+      cnt[r.category]=(cnt[r.category]||0)+1;
+    });
+  }
+  return cnt;
+}
+
+/* ========= Rendering ========= */
+function renderSummary(recs){
+  const counts = categoryCounts(recs);
+  const tb = document.querySelector('#summaryTable tbody'); tb.innerHTML='';
+  for(const [cat,val] of Object.entries(counts)){
+    const tr = document.createElement('tr'); tr.innerHTML=`<td>${cat}</td><td>${val}</td>`;
+    tb.appendChild(tr);
+  }
+  pieChart.data.labels = Object.keys(counts);
+  pieChart.data.datasets[0].data = Object.values(counts);
+  pieChart.data.datasets[0].backgroundColor = pieChart.data.labels.map(c=>catColor[c]);
+  pieChart.update();
+}
+function renderEntityTable(recs){
+  const title = document.getElementById('entityTitle'),
+        wrap  = document.getElementById('entityWrap'),
+        tb    = document.querySelector('#entityTable tbody');
+  if(!rollupMode){ title.classList.add('hidden'); wrap.classList.add('hidden'); return;}
+  title.classList.remove('hidden'); wrap.classList.remove('hidden'); tb.innerHTML='';
+  rollupByEntity(recs).forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${entityLink(r.entity)}</td><td>${r.category}</td>`;
+    tb.appendChild(tr);
+  });
+}
+/* ---------- slug helper (same rule used elsewhere) ---------- */
+function slugify(name){
+  return name.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
+}
+
+/* ---------- modify renderDetails so each entity gets an anchor ---------- */
+function renderDetails(recs){
+  const tb = document.querySelector('#detailTable tbody'); tb.innerHTML='';
+  const firstRowDone = {};   // entity → boolean
+
+  recs.forEach(r=>{
+    if(currentCategoryFilter && r.category!==currentCategoryFilter) return;
+
+    const tr = document.createElement('tr');
+
+    /* give the FIRST row for each entity a stable id to link to */
+    if(!firstRowDone[r.entity]){
+      tr.id = "ent-" + slugify(r.entity);
+      firstRowDone[r.entity] = true;
+    }
+
+    tr.innerHTML = `<td>${r.date}</td><td>${r.state}</td><td>${r.county}</td>
+                    <td>${entityLink(r.entity)}</td><td>${r.category}</td>
+                    <td>${r.snippet}</td><td>${r.reason}</td>`;
+    tb.appendChild(tr);
+  });
+}
+function render(){
+  const recs = filterByDate(originalDetails);
+  renderSummary(recs);
+  renderEntityTable(recs);
+  renderDetails(recs);
+}
+
+/* ========= Controls ========= */
+document.getElementById('applyFilter').onclick = ()=>{currentCategoryFilter=null;document.getElementById('resetCategory').classList.add('hidden');render();};
+document.getElementById('clearFilter').onclick = ()=>{
+  ['startDate','endDate'].forEach(id=>document.getElementById(id).value='');
+  currentCategoryFilter=null; document.getElementById('resetCategory').classList.add('hidden');
+  render();
+};
+document.getElementById('resetCategory').onclick = ()=>{currentCategoryFilter=null;document.getElementById('resetCategory').classList.add('hidden');render();};
+document.getElementById('rollupButton').onclick = ()=>{
+  rollupMode = !rollupMode;
+  document.getElementById('rollupButton').textContent = rollupMode?'Switch to Detailed View':'Switch to Overall View';
+  currentCategoryFilter=null; document.getElementById('resetCategory').classList.add('hidden');
+  render();
+};
+
+/* ========= Clone View feature ========= */
+document.getElementById('cloneButton').onclick = ()=>{
+  const recs = filterByDate(originalDetails);
+  const counts = categoryCounts(recs);
+  if(Object.keys(counts).length===0) return;
+
+  // compose label text
+  const s = document.getElementById('startDate').value || '‒';
+  const e = document.getElementById('endDate').value || '‒';
+  const label = `Range: ${s} → ${e} | ${rollupMode?'Overall':'Detailed'}${currentCategoryFilter?` | Filter: ${currentCategoryFilter}`:''}`;
+
+  // build container
+  const box = document.createElement('div'); box.className='cloneBox';
+  box.innerHTML = `<div class="cloneLabel">${label}</div>
+                   <div class="cloneChart"><canvas></canvas></div>
+                   <button>Remove</button>`;
+  document.getElementById('clones').appendChild(box);
+
+  // make chart
+  const cvx = box.querySelector('canvas').getContext('2d');
+  const cloneChart = new Chart(cvx,{type:'pie',
+     data:{ labels:Object.keys(counts),
+            datasets:[{ data:Object.values(counts),
+                        backgroundColor:Object.keys(counts).map(c=>catColor[c]) }]},
+     options:{ plugins:{legend:{display:false}} } });
+
+  // remove-button handler
+  box.querySelector('button').onclick = ()=>{
+    cloneChart.destroy();
+    box.remove();
+  };
+};
+</script>
+</body>
+</html>

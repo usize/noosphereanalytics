@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta property="og:title" content="Noosphere Analytics" />
+  <meta property="og:description" content="Automated research infrastructure for institutional data — built for clarity, speed, and civic impact." />
+  <meta property="og:image" content="https://noosphereanalytics.nl/charts.PNG" />
+  <meta property="og:url" content="https://noosphereanalytics.nl/" />
+  <meta property="og:type" content="website" />
+  <title>Noosphere Analytics - Domain-Specific Deep Research</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+ /* Blog link in top right corner */
+  .top-nav {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    z-index: 2000;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  .top-nav a {
+    color: #333;
+    text-decoration: none;
+  }
+  .top-nav a:hover {
+    text-decoration: underline;
+  }    
+
+/* ——— Base ——— */
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Roboto',sans-serif;background:#f4f4f9;color:#333;text-align:center}
+    img{max-width:100%;height:auto;display:block}
+
+    a{color:#0062cc;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    h1,h2,h3{margin:0;font-weight:500}
+    h2{font-size:2rem}
+
+	.legal{
+	  margin-top:40px;
+	  font-size:.85rem;
+	  line-height:1.4;
+	  color:#666;
+	}
+
+    /* ——— Hero ——— */
+    .hero{padding:80px 20px;background:#fff}
+    .hero h1{font-size:3rem;margin-bottom:10px}
+    .hero-tag{font-size:1.1rem;color:#444;max-width:680px;margin:0 auto 30px;line-height:1.5}
+    .cta{display:inline-block;background:#0062cc;color:#fff;padding:12px 28px;border-radius:6px;font-weight:500}
+    .cta:hover{background:#004999}
+	.hero{
+	  position:relative;
+	  overflow:hidden;
+	  padding:100px 20px 120px;
+	  background:#000;                 /* ensures blend works if images missing */
+	}
+
+	.hero-bg{
+	  position:absolute;inset:0;
+	  display:flex;justify-content:center;gap:40px;
+	  opacity:0.30;                    /* base faintness of screenshots */
+	  mix-blend-mode:normal;
+	}
+
+	.hero-bg img{
+	  height:100%;
+	  object-fit:cover;
+	  flex:0 0 400px;
+	}
+
+	.hero-overlay{
+	  position:absolute;inset:0;
+	  background:rgba(0,0,0,0.45);     /* adjust 0.45 → 0.30 for lighter, 0.60 for darker */
+	  pointer-events:none;
+	}
+
+	.hero-inner{
+	  position:relative;z-index:1;
+	  max-width:700px;margin:0 auto;
+	  text-align:left;
+	  color:#fff;                      /* white text over darkened bg */
+	}
+
+	.hero h1{font-size:3rem;margin-bottom:12px}
+	.hero-tag{font-size:1.1rem;line-height:1.5;margin-bottom:30px;color:#e0e0e0}
+
+    /* ——— Datasets ——— */
+    .datasets{padding:40px 20px;background:#f8f9fa}
+    .card-grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));max-width:1000px;margin:0 auto}
+    .card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:20px;text-align:left;box-shadow:0 2px 6px rgba(0,0,0,0.05)}
+    .card h3{font-size:1.2rem;margin-bottom:8px}
+    .card-years{font-weight:400;font-size:.9rem;color:#666}
+    .card p{font-size:.95rem;color:#555;margin:0 0 12px}
+    .card-link{font-weight:500}
+    .datasets-note{
+          max-width:700px;margin:5px auto 30px;font-size:.95rem;line-height:1.55;color:#444
+    }
+
+    /* ——— Pipeline ——— */
+    .pipeline{padding:20px 20px}
+    .steps{display:flex;flex-wrap:wrap;justify-content:center;gap:40px;max-width:1000px;margin:0 auto}
+    .step{width:260px;text-align:center}
+    .step img{width:64px;height:64px;margin-bottom:12px;opacity:.85}
+    .step h3{font-size:1.1rem;margin:10px 0 8px}
+    .step p{font-size:.95rem;color:#555;line-height:1.4}
+    .pipeline-note{
+          max-width:700px;margin:5px auto 30px;font-size:.95rem;line-height:1.55;color:#444
+    }
+
+    /* ——— Testimonials & Partnerships (kept from original) ——— */
+    .testimonials,.partnerships{padding:0 20px;max-width:900px;margin:0 auto}
+    .testimonials h2,.partnerships h2{font-size:2.5rem;margin:40px 0 30px;font-weight:600;color:#222;border-bottom:3px solid #007BFF;display:inline-block;padding-bottom:5px}
+    .testimonial-card{background:#fff;border-left:5px solid #007BFF;padding:20px;margin-bottom:30px;border-radius:8px;color:#333;text-align:left;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+    .testimonial-card h3{margin-top:10px;color:#000}
+	/* --- testimonial avatars --- */
+	.testimonial-card{display:flex;gap:16px}          /* tweak existing rule */
+	.avatar{
+	  width:68px;height:68px;border-radius:50%;
+	  object-fit:cover;flex:0 0 68px;box-shadow:0 0 0 2px #007BFF33
+	}
+	.testimonial-text{flex:1}
+
+    /* ——— Modal (unchanged) ——— */
+    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center}
+    .modal-content{background:#fff;padding:20px;border-radius:8px;max-width:90%;width:600px}
+    .modal iframe{width:100%;height:400px;border:none}
+    .close-modal{background:#555;color:#fff;padding:5px 10px;border:none;border-radius:5px;cursor:pointer;float:right}
+
+    footer{margin:40px 0 20px;font-size:.9rem;color:#777}
+
+    /* ——— About / Founder card ——— */
+    .about{padding:50px 20px;background:#fff}
+    .about-inner{max-width:820px;margin:0 auto;display:flex;flex-wrap:wrap;gap:30px;align-items:center;text-align:left}
+    .about-img{
+          width:120px;height:120px;border-radius:50%;object-fit:cover;
+            flex:0 0 120px;box-shadow:0 0 0 2px #0062cc33
+    }
+    .about-copy h2{font-size:2rem;margin:0 0 12px;color:#222}
+    .about-copy p{font-size:.95rem;line-height:1.55;margin:0 0 12px;color:#444}
+    @media(max-width:640px){.about-inner{flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+
+<body>
+<div class="top-nav">
+      <a href="/blog">[ Tech Blog ]</a>
+</div>
+<!-- Logo -->
+<img src="logo.png" alt="Noosphere Analytics Logo" style="width:150px;margin:10px auto 10px">
+<!-- ========= HERO ========= -->
+<section class="hero">
+  <!-- background collage -->
+  <div class="hero-bg">
+    <img src="dashboard.PNG" alt="">
+    <img src="charts.PNG" alt="">
+    <img src="positions-supported.PNG" alt="">
+  </div>
+
+  <!-- headline + copy -->
+  <div class="hero-inner">
+    <h1>Domain-Specific Deep Research</h1>
+    <p class="hero-tag">
+      General-purpose AI research is powerful but pricey at scale.
+      We pre-crawl and pre-process niche public data so you ask questions and get answers in seconds-not hours.
+    </p>
+    <center><a href="#" class="cta" onclick="openModal()">Request&nbsp;a&nbsp;Demo</a></center>
+  </div>
+</section>
+  
+  <!-- ========= HOW IT WORKS ========= -->
+  <section class="pipeline">
+    <h2>How It Works</h2>
+	<p class="pipeline-note">We pre-fetch and pre-process data specific to your domain, so your research is faster, cheaper and more robust than a general purpose tool could provide. In Computer Science terms we are making
+    a classic <a href="https://en.wikipedia.org/wiki/Space%E2%80%93time_tradeoff">space-time tradeoff</a>. A time tested model for improving performance that is more relevant than ever in the age of AI, because inference is expensive and space is cheap. 
+    </p>
+    <div class="steps">
+		<div class="step">
+		  <div style="font-size:56px">🕷️</div>
+		  <h3>Smart Crawlers</h3>
+		  <p>LLM-guided agents navigate sites and playlists—each file is fetched once.</p>
+		</div>
+
+		<div class="step">
+		  <div style="font-size:56px">🔄</div>
+		  <h3>Normalization &amp; Validation</h3>
+		  <p>OCR, transcription &amp; entity linking turn raw PDFs & clips into clean records.</p>
+		</div>
+
+		<div class="step">
+		  <div style="font-size:56px">📊</div>
+		  <h3>Instant Insight Engine</h3>
+		  <p>Relational&nbsp;+&nbsp;vector storage powers AI assisted search and reports.</p>
+		</div>
+    </div>
+  </section>
+
+
+  <!-- ========= DATASETS ========= -->
+  <section class="datasets">
+    <h2>Explore Ready-Made Datasets</h2>
+  <p class="datasets-note">
+    Each dataset is exported straight from our AI-assisted research tool.  
+    You get the original prompt, the auto-gathered sources, and the assistant’s structured analysis-ready to filter, cite and reuse.
+  </p>
+    <div class="card-grid">
+
+      <article class="card">
+        <h3>Book-Removal Requests<br><span class="card-years">Washington State, 2016 - Nov 2024</span></h3>
+        <p>A categorization of discussions around removing materials from school libraries or curriculums. <br><br>
+        <b>174</b> citations out of 92,660 documents</p>
+        <a href="demos/book-discussions" class="card-link">Preview&nbsp;→</a>
+      </article>
+
+      <article class="card">
+        <h3>MOU Agreements<br><span class="card-years">Washington State, 2024 - Apr 2025</span></h3>
+        <p>Discussions or mentions of agreements between local community colleges and high schools.<br><br>
+        <b>64</b> citations out of 30,567 documents</p>
+        </p>
+        <a href="demos/MOU" class="card-link">Preview&nbsp;→</a>
+      </article>
+      
+    <article class="card">
+        <h3>Accessibility Requirements<br><span class="card-years">Washington State, 2024 - Sept 2025</span></h3>
+        <p>Contracts, memos and other records indicating accessibility requirements for edtech products.<br><br>
+        <b>272</b> citations out of 38,819 documents</p>
+        </p>
+        <a href="demos/edtech_access_requirements" class="card-link">Preview&nbsp;→</a>
+      </article>
+      
+      <article class="card">
+        <h3>State Wide Tech Product Usage<br><span class="card-years">West Virginia, Jan 2024 - June 2025</span></h3>
+        <p>A detailed list of which tech products are being used, purchased or discussed in West Virginia Schools.<br><br>
+        <b>235</b> citations out of 37,598 documents</p>
+        </p>
+        <a href="demos/WV_tech" class="card-link">Preview&nbsp;→</a>
+      </article>
+      
+      <article class="card">
+        <h3>Complete State Data Archive<br><span class="card-years">West Virginia, Jan 2024 - June 2025</span></h3>
+        <p>A complete scrape of West Virginia school board documents during the 2024-2025 school year.<br><br>
+        <p>55 districts, <b>46573 files</b></p> 
+        </p>
+        <a href="https://archive.org/details/wv_2024_2025_noosphere_analytics" class="card-link">Preview&nbsp;→</a>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ========= TESTIMONIALS & PARTNERSHIPS (unchanged) ========= -->
+  <div class="testimonials">
+    <h2>Testimonials</h2>
+	<div class="testimonial-card">
+	  <img src="isabel-alter.jpeg" alt="Isabel Alter" class="avatar">
+	  <div class="testimonial-text">
+            <p>"Morgan's tool is groundbreaking for our work .. She's extremely skilled at processing a real world situation and applying it to tool development. The work she's done in the most useful and thoughtful application I've seen of AI ..."</p>
+
+		  <i>on using our platform to model upcoming elections across hundreds of school districts.</i>
+		</p>
+		<h3>- <a href="https://www.linkedin.com/in/isabel-a-9b176253/" target="_blank">Isabel&nbsp;Alter</a><br>
+            Co-Founder, The School Board Project</h3>
+	  </div>
+	</div>
+	
+    <div class="testimonial-card">
+	  <img src="heather-flaherty.jpeg" alt="Heather Flaherty" class="avatar">
+	  <div class="testimonial-text">
+		<p>
+		  "Morgan is hands down one of the smartest, coolest, most incredible and creative people I have had the
+		  privilege of working with ..."<br><br>
+		  <i>after using BoardLink to track disbursements from municipal contracts.</i>
+		</p>
+		<h3>- <a href="https://www.linkedin.com/in/hflaherty/" target="_blank">Heather&nbsp;Flaherty</a><br>
+            Executive Director, <a href="https://www.chuckanuthealthfoundation.org/">Chuckanut Health Foundation</a></h3>
+	  </div>
+	</div>
+
+<!-- ========= ABOUT THE FOUNDER ========= -->
+<section class="about">
+  <div class="about-inner">
+    <div class="about-copy">
+      <h2>Background</h2>
+
+      <p>
+      Hello, I'm <a href="https://www.linkedin.com/in/morgan-f-3151a7170/">Morgan Foster</a>. I began my career in software over fifteen years ago, working on solid state physics research and writing analysis software for <a href="https://en.wikipedia.org/wiki/X-ray_crystallography">X-ray Diffraction machines</a>. Since then I've had the good luck to work on site reliability at Facebook, Google
+and Twitter - and to make some fun contributions to the Firefox Web Browser.
+      <p>
+        • Re-implementing JavaScript’s <em>Array.sort</em>
+        (<a href="https://github.com/mozilla/gecko-dev/commit/6f74efb51b3089ee8321f97e86c7c6ef7574f596" target="_blank">diff</a>)
+        and landing multiple ES6 features
+        (<a href="https://github.com/mozilla/gecko-dev/commit/46f9414ab1a271debd7ac5abe5e1eb6e72606943" target="_blank">commits</a>).<br>
+        • Being an early contributor to WebAssembly’s flagship runtime,
+        <a href="https://github.com/bytecodealliance/wasmtime/commits?author=usize" target="_blank">Wasmtime 🎯</a>.<br>
+        • Adding links to developer documentation from console errors,
+        <a href="https://tech.mozfr.org/post/2016/06/08/Aider-les-developpeurs-web-a-propos-des-erreurs-JavaScript" target="_blank">MozFR post</a>.
+      </p>
+
+      <p>
+        I founded <strong>Noosphere Analytics</strong> to solve a problem I encountered doing public-interest research: how to get a top-down view of K-12 education in the U.S.’s fragmented public school system. That required building a “smart pipeline” - an end-to-end system that automates the process of gathering, cleaning, and organizing scattered public data.
+      </p>
+      <p>
+      Today, that system powers research not just in education, but anywhere institutional data is hard to collect and harder to understand. I’m excited to see how my clients are using it - and how we can keep expanding what’s possible with civic data.
+
+      </p>
+    </div>
+  </div>
+</section>
+
+  <!-- ========= FOOTER ========= -->
+	<footer class="legal">
+	</footer>
+  <!-- ========= JS ========= -->
+  <script>
+    function openModal(){document.getElementById('inquiryModal').style.display='flex'}
+    function closeModal(){document.getElementById('inquiryModal').style.display='none'}
+  </script>
+</body>
+</html>

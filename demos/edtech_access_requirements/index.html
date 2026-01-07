@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interactive Data Explorer</title>
+
+<!-- ◄◄ map >>> Leaflet CSS/JS -->
+<link  rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet CSS -->
+<style>
+  /* ◄◄ map >>> */
+  #map { height: 420px; max-width: 860px; margin: 2.0em auto; border:1px solid var(--border); }
+</style>
+<!-- ◄◄ map >>> -->
+
+<!-- ─── COLOURS & LAYOUT ─────────────────────────────────────────────── -->
+<style>
+:root{
+  --accent: #4e79a7;          /* main brand colour                       */
+  --accent-light: #e3ecf5;
+  --gap:   12px;
+  --bg:    #f9fbfc;
+  --border:#c8d0d8;
+  --zebra : #f5f7f9;
+  --font:  system-ui, Arial, sans-serif;
+}
+html,body{margin:0;padding:0;background:var(--bg);color:#222;font-family:var(--font);}
+h1,h2{margin:.5em 0;text-align:center;color:var(--accent);}
+h2{margin-top:1.5em;font-size:1.25em;}
+#container{padding:var(--gap);}
+#chartContainer{width:100%;max-width:480px;margin:0 auto;}
+canvas{width:100%!important;height:auto!important;display:block;}
+/* ----- controls bar ----- */
+#controls{display:flex;flex-wrap:wrap;gap:var(--gap);justify-content:center;margin:1.3em 0;}
+button,input[type="date"]{font-size:.9em;border:1px solid var(--border);border-radius:4px;padding:.35em .8em;}
+button{background:var(--accent);color:#fff;cursor:pointer;transition:.2s;}
+button:hover{filter:brightness(.93);}
+button[disabled]{opacity:.6;cursor:default;}
+/* tool-tips */
+[data-tip]{position:relative;}
+[data-tip]::after{
+  content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 6px);
+  transform:translateX(-50%);background:#333;color:#fff;font-size:.75em;
+  padding:4px 6px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s;
+}
+[data-tip]:hover::after{opacity:1;}
+/* ----- tables ----- */
+.table-wrap{overflow-x:auto;}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:.9em;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:left;}
+th{background:var(--accent);color:#fff;}
+tbody tr:nth-child(even){background:var(--zebra);}
+tbody tr:hover{background:var(--accent-light);}
+.hidden{display:none;}
+th.sortable{cursor:pointer;position:relative;user-select:none}
+th.sortable::after{
+  content:"";position:absolute;right:8px;top:50%;width:6px;height:6px;
+  border-right:2px solid #fff;border-bottom:2px solid #fff;
+  transform:translateY(-50%) rotate(45deg);opacity:.7;
+}
+th.sortable.sorted-desc::after{transform:translateY(-50%) rotate(-135deg);}
+/* summary header table */
+#metaTbl{max-width:850px;margin:0 auto 1.6em;border:none;width:100%;}
+#metaTbl td{border:none;padding:3px 4px;}
+#metaTbl td.label{font-weight:600;color:#555;text-align:right;white-space:nowrap;}
+#metaTbl td.value{padding-left:6px;}
+/* category legend */
+#catLegendWrap{max-width:850px;margin:0 auto 1.4em;}
+#catLegend{border:none;width:100%;}
+#catLegend td{border:none;padding:2px 6px;}
+#catLegend td.swatch{width:18px;border-radius:3px;}
+/* executive-summary markdown */
+#execSummary{max-width:850px;margin:1.4em auto;font-size:.95em;line-height:1.5}
+#execSummary p{margin:.6em 0}
+#execSummary em{font-style:italic}
+#execSummary strong{font-weight:600}
+/* ── collapsible sections ───────────────────────────── */
+details        { border:1px solid #ccc; border-radius:6px; margin:var(--gap) 0; }
+details[open]  { box-shadow:0 1px 4px rgba(0,0,0,.08); }
+details summary{
+  cursor:pointer;font-weight:600;
+  padding:calc(var(--gap) - 2px) 0;           /* align with page rhythm */
+  list-style:none;                            /* hide default arrow */
+}
+details summary::before{                      /* custom ▸ / ▾ marker */
+  content:"▸"; display:inline-block; width:1em; transition:transform .15s;
+}
+details[open] summary::before{ transform:rotate(90deg); }
+/* ── AI disclaimer banner ─────────────────────────────── */
+.disclaimer{
+  background:#fff3cd;          /* soft amber */
+  color:#856404;
+  border:1px solid #ffeeba;
+  padding:10px 14px;
+  margin:18px auto;
+  max-width:860px;
+  font-size:.9rem;
+  line-height:1.45;
+  border-radius:6px;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Markdown → HTML (40 kB, no deps) -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body><div id="container">
+
+  <h1>Interactive Data Explorer</h1>
+<div class="disclaimer" role="note">
+  ⚠️ This report was automatically generated with AI assistance.  
+  While we strive for accuracy, the content may contain errors or omissions—please verify critical information independently.
+</div>
+
+
+  <!-- header summary (filled by JS) -->
+  <table id="metaTbl"></table>
+
+  <!-- geodata -->
+  <!--<div id="map"></div>
+
+  <!-- summary counts -->
+  <h2>Analysis</h2>
+  <!-- ▸ EXECUTIVE SUMMARY (collapsible) -->
+  <details id="execSection" closed>
+      <summary>Qualitative Analysis <i>(click to open/close)</i></summary>
+    <!-- Markdown from report.md will be rendered in here -->
+    <div id="execSummary" style="line-height:1.6"></div>
+  </details>
+
+  <!-- overall per entity -->
+  <h2 id="entityTitle" class="hidden">Overall Category per Entity</h2>
+	<!-- details -->
+	<h2>Data</h2>
+	<div class="table-wrap">
+	  <table id="detailTable">
+		<thead>
+		  <tr>
+			<th>Doc&nbsp;⇢</th>                     <!-- first col, NOT sortable -->
+			<th class="sortable" data-key="date">Date</th>
+			<th class="sortable" data-key="state">State</th>
+			<th class="sortable" data-key="county">County</th>
+			<th class="sortable" data-key="entity">Entity</th>
+			<th class="sortable" data-key="snippet">Snippet</th>
+			<th>💭</th>                             <!-- reasoning emoji -->
+		  </tr>
+		</thead>
+		<tbody></tbody>
+	  </table>
+	</div>
+  
+  <!-- ─── controls bar ──────────────────────────────────────────────── -->
+  <div id="controls" style="display:none">
+    <label data-tip="Filter records on or after this date">Start <input type="date" id="startDate"></label>
+    <label data-tip="Filter records on or before this date">End <input type="date" id="endDate"></label>
+    <button id="rollupBtn"  data-tip="Toggle detailed vs overall-per-entity view">Switch&nbsp;to&nbsp;Overall&nbsp;View</button>
+    <button id="applyBtn"   data-tip="Apply the selected date range">Apply</button>
+    <button id="clearBtn"   data-tip="Reset date range &amp; slice filter">Clear</button>
+    <button id="resetCatBtn" class="hidden" data-tip="Remove the category slice filter">Reset&nbsp;Category</button>
+    <!-- …inside #controls … -->
+    <button id="trendToggle"
+        data-tip="Toggle between the slice view and a month-by-month trend line">
+      Show&nbsp;Trend&nbsp;Line
+    </button>
+  </div>
+
+  <!-- legend of verification categories -->
+  <div id="catLegendWrap" class="hidden">
+    <table id="catLegend"></table>
+  </div>
+
+  <!-- chart -->
+  <div id="chartContainer" style="display:none">
+    <canvas id="pieChart" style="display:none"></canvas>
+    <canvas id="lineChart" style="display:none"></canvas>
+  </div>
+
+  <br/>
+  <div class="table-wrap"><table style="display:none" id="summaryTable">
+    <thead><tr><th>Category</th><th>Count</th></tr></thead><tbody></tbody></table></div>
+
+  <div id="entityWrap" class="table-wrap hidden"><table id="entityTable" >
+    <thead><tr><th>Entity</th><th>Overall Category</th></tr></thead><tbody></tbody></table></div>
+
+
+</div>
+
+<script>
+/* ========== Globals & helpers ======================================= */
+const palette=['#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f',
+               '#edc949','#af7aa1','#ff9da7','#9c755f','#bab0ab'];
+const catColor={};          // category → colour
+const MIN_SCORE = 0.0;  // Minimal category confidence, for displaying data.
+let original=[], currentSlice=null, rollup=false, chartMode='pie';
+
+/* ---------- small utilities ---------- */
+const $ = sel => document.querySelector(sel);
+function byDate(recs){
+  const s=$('#startDate').value, e=$('#endDate').value;
+  return recs.filter(r=>(!s||r.date>=s)&&(!e||r.date<=e));
+}
+
+function buildTrendData(recs){
+  // month → category → count
+  const buf = {};
+  recs.forEach(r=>{
+    if(currentSlice && r.category !== currentSlice) return;
+    const m = r.date.slice(0,7);          // YYYY-MM
+    (buf[m] ??= {});
+    buf[m][r.category] = (buf[m][r.category] || 0) + 1;
+  });
+
+  const labels = Object.keys(buf).sort();                     // months
+  const cats   = [...new Set(recs.map(r => r.category))].sort();
+
+  const datasets = cats.map(cat => ({
+    label: cat,
+    data : labels.map(m => buf[m]?.[cat] || 0),
+    borderColor   : catColor[cat] || '#888',
+    backgroundColor: catColor[cat] || '#888',
+    tension: .25,
+    /* hide everything except the selected slice when filtering */
+    hidden: currentSlice ? (cat !== currentSlice) : false
+  }));
+
+  return { labels, datasets };
+}
+
+/* ---------- roll-up by entity (using summed confidence) ---------- */
+function rollupByEntity(recs){
+  const acc={};                       // entity → {cat:{score,count}}
+  recs.forEach(r=>{
+    const ent=r.entity, cat=r.category, s=Number(r.score)||0;
+    acc[ent]??={};
+    acc[ent][cat]??={score:0,count:0};
+    acc[ent][cat].score+=s; acc[ent][cat].count++;
+  });
+  const out=[];
+  Object.entries(acc).forEach(([entity,cats])=>{
+    const sorted=Object.entries(cats).sort((a,b)=>{
+      if(b[1].score!==a[1].score) return b[1].score-a[1].score;        // score first
+      if(b[1].count!==a[1].count) return b[1].count-a[1].count;        // then items
+      return a[0].localeCompare(b[0]);
+    });
+    if(sorted.length>1 && sorted[0][1].score===sorted[1][1].score && sorted[0][1].count===sorted[1][1].count){
+      out.push({entity,category:'tie'});
+    }else out.push({entity,category:sorted[0][0]});
+  });
+  return out;
+}
+
+/* ---------- count categories ---------- */
+function catCounts(recs){
+  const cnt={};
+  (rollup? rollupByEntity(recs): recs).forEach(r=>{
+    if(currentSlice && r.category!==currentSlice) return;
+    cnt[r.category]=(cnt[r.category]||0)+1;
+  });
+  return cnt;
+}
+
+/* ---------- build meta header ---------- */
+function buildMeta(hdr, details){
+  const tbl=$('#metaTbl'); tbl.innerHTML='';
+  function addRow(label,val){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="label">${label}:</td><td class="value">${val}</td>`;
+    tbl.appendChild(tr);
+  }
+  addRow('Description',hdr.description||'—');
+  addRow('Query text',hdr.query||'—');
+  addRow('Date range',`${hdr.start||'—'} ➜ ${hdr.end||'—'}`);
+  addRow('State(s)',hdr.states||'—');
+  addRow('Max results/term',hdr.maxResults||'—');
+  addRow('Total hits',details.length);
+}
+
+/* ---------- legend for verification categories ---------- */
+function buildLegend(vCats){
+  if(!vCats||!Object.keys(vCats).length) return;
+  $('#catLegendWrap').classList.remove('hidden');
+  const tbl=$('#catLegend'); tbl.innerHTML='';
+  Object.entries(vCats).forEach(([cat,desc])=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="swatch" style="background:${catColor[cat]||'#666'}"></td><td>${cat}</td><td>${desc}</td>`;
+    tbl.appendChild(tr);
+  });
+}
+
+/* ========== Chart initialisation ==================================== */
+const ctx=$('#pieChart').getContext('2d');
+const pieChart=new Chart(ctx,{type:'pie',data:{labels:[],datasets:[{data:[],backgroundColor:[]}]},
+  options:{plugins:{legend:{display:false}},
+    onClick(evt){
+      const pts=pieChart.getElementsAtEventForMode(evt,'nearest',{intersect:true},true);
+      if(!pts.length) return;
+      currentSlice=pieChart.data.labels[pts[0].index];
+      $('#resetCatBtn').classList.remove('hidden');
+      render();
+  }}});
+
+
+/* ---------- line chart (initially empty / hidden) ---------- */
+const lctx = $('#lineChart').getContext('2d');
+const lineChart = new Chart(lctx, {
+  type : 'line',
+  data : { labels:[], datasets:[] },
+  options : {
+    responsive:true,
+    plugins:{ legend:{ position:'bottom' } },
+    scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } }}
+  }
+});
+
+
+/* --- filename → archive/<slug>.html ----------------------------- */
+function slugify(s){
+  return s.toLowerCase()
+          .replace(/[^a-z0-9.\-]+/g,'-')   // keep letters, numbers, . –
+          .replace(/^-+|-+$/g,'');         // trim leading/trailing -
+}
+function archiveLink(entity_name, filename){
+  const stem = filename.replace(/\.[^.]+$/,'');        // drop extension
+  const entity_name_slug = entity_name.replace(/_/g, '-');
+  return "archive/" + entity_name_slug + "-" + slugify(stem) + ".html";
+}
+
+/* --- table sorting ---------------------------------------------- */
+let sortKey = null, sortDir = 1;          // 1 = asc, -1 = desc
+document.addEventListener('click', e=>{
+  const th = e.target.closest('th.sortable');
+  if(!th) return;
+
+  const key = th.dataset.key;
+  if(sortKey === key){ sortDir *= -1; }   // toggle direction
+  else{ sortKey = key; sortDir = 1; }
+
+  [...th.parentNode.children].forEach(h=>h.classList.remove('sorted-desc'));
+  if(sortDir === -1) th.classList.add('sorted-desc');
+
+  render();
+});
+
+/* ========== Render functions ======================================== */
+function render(){
+  const recs = byDate(original);
+
+  /* ========== decide which chart to show ========== */
+  if(chartMode === 'line'){
+    $('#pieChart').style.display = 'none';
+    $('#lineChart').style.display = 'block';
+
+    const {labels,datasets} = buildTrendData(recs);
+    lineChart.data.labels = labels;
+    lineChart.data.datasets = datasets;
+    lineChart.update();
+
+  }else{                    // pie mode
+    $('#lineChart').style.display = 'none';
+    $('#pieChart').style.display = 'block';
+
+    const counts = catCounts(recs);
+    pieChart.data.labels = Object.keys(counts);
+    pieChart.data.datasets[0].data = Object.values(counts);
+    pieChart.data.datasets[0].backgroundColor =
+        pieChart.data.labels.map(c=>catColor[c]||'#888');
+    pieChart.update();
+  }
+
+  /* ----- Summary table (unchanged) ----- */
+  const counts = catCounts(recs);
+  const sumBody = $('#summaryTable tbody'); sumBody.innerHTML='';
+  Object.entries(counts).forEach(([cat,val])=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${cat}</td><td>${val}</td>`;
+      sumBody.appendChild(tr);
+  });
+
+  /* overall table */
+  const entTitle=$('#entityTitle'), entWrap=$('#entityWrap'), entBody=$('#entityTable tbody');
+  if(!rollup){ entTitle.classList.add('hidden'); entWrap.classList.add('hidden'); }
+  else{
+    entTitle.classList.remove('hidden'); entWrap.classList.remove('hidden'); entBody.innerHTML='';
+    rollupByEntity(recs).forEach(r=>{
+      const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.entity}</td>`;
+      entBody.appendChild(tr);
+    });
+  }
+
+	/* ------------------------------------------------ details rows ---- */
+	const detBody = $('#detailTable tbody'); detBody.innerHTML = '';
+
+	let recsToShow = byDate(original);
+	if (sortKey) {
+	  recsToShow = [...recsToShow].sort((a, b) => {
+		const va = (a[sortKey] || '').toString().toLowerCase();
+		const vb = (b[sortKey] || '').toString().toLowerCase();
+		return va > vb ? sortDir : va < vb ? -sortDir : 0;
+	  });
+	}
+
+    let seenSnippets = [];
+	recsToShow.forEach(r => {
+	  if (currentSlice && r.category !== currentSlice) return;
+      if (seenSnippets.includes(r.snippet)) return;
+      seenSnippets.push(r.snippet);
+	  /* ---- archive link -------------------------------------------- */
+	  const fileLink = r.filename
+		  ? `<a href="${archiveLink(r.entity, r.filename)}" target="_blank">view</a>`
+		  : '—';
+
+	  /* ---- reasoning bubble ---------------------------------------- */
+	  const reasonCell = r.reason
+		  ? `<a href="#" data-tip="${r.reason.replace(/"/g, '&quot;')}"
+				  style="text-decoration:none">💭</a>`
+		  : '';
+
+	  /* ---- table row ----------------------------------------------- */
+	  const tr = document.createElement('tr');
+	  tr.innerHTML = `
+		  <td>${fileLink}</td>
+		  <td>${r.date}</td><td>${r.state}</td><td>${r.county}</td>
+		  <td>${r.entity}</td>
+		  <td>${r.snippet || ''}</td>
+		  <td style="text-align:center">${reasonCell}</td>`;
+	  detBody.appendChild(tr);
+	});
+
+}
+
+/* ========== Controls ================================================ */
+$('#applyBtn').onclick=()=>{currentSlice=null;$('#resetCatBtn').classList.add('hidden');render();};
+$('#clearBtn').onclick=()=>{
+  ['#startDate','#endDate'].forEach(id=>$(id).value='');
+  currentSlice=null;$('#resetCatBtn').classList.add('hidden');render();
+};
+$('#resetCatBtn').onclick=()=>{currentSlice=null;$('#resetCatBtn').classList.add('hidden');render();};
+$('#rollupBtn').onclick=()=>{
+  rollup=!rollup;
+  $('#rollupBtn').textContent=rollup?'Switch to Detailed View':'Switch to Overall View';
+  currentSlice=null;$('#resetCatBtn').classList.add('hidden');
+  render();
+};
+
+/* ========== Initial data load ======================================= */
+(async()=>{
+  const res=await fetch('hlq.json'); const hlq=await res.json();
+  /* flatten verified items into original[] */
+  const rows=[];
+  const seen = new Set();
+  hlq.query_responses.forEach(qr=>{
+    qr.results.forEach(res=>{
+      res.items.forEach(it=>{
+        if(!it.verified_by_llm) return;
+        const meta=it.metadata||{};
+        const seg = it.segment_id || 'noSeg';
+          Object.entries(it.categories || {'':0}).forEach(([cat, score])=>{
+            const key = `${seg}||${cat}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+            rows.push({
+              segment : seg,
+              date    : meta.date        || '',
+              state   : meta.state       || '',
+              county  : meta.county      || '',
+              entity  : meta.entity_name || '',
+              category: cat,
+              score   : score,
+              snippet : it.content_snippet         || '',
+              reason  : it.verified_by_llm_reasoning || '',
+			  filename : meta.raw_filename || meta.filename || '',
+			  raw     : it.verified_by_llm_reasoning || ''           
+          });
+        });
+      });
+    });
+  });
+  original=rows;
+  /* palette for categories */
+  const allCats=[...new Set(original.map(r=>r.category))].sort();
+  allCats.forEach((c,i)=>catColor[c]=palette[i%palette.length]);
+  /* header & legend */
+  const firstMeta=original[0]||{};
+  buildMeta({
+    description:hlq.description||'',
+    query:hlq.query_responses?.[0]?.query_text||'',
+    start:original.length?original.map(r=>r.date).sort()[0]:'',
+    end:original.length?original.map(r=>r.date).sort().slice(-1)[0]:'',
+    states:[...new Set(original.map(r=>r.state))].filter(Boolean).join(', '),
+    maxResults:hlq.max_results_per_term||'',
+  },original);
+  buildLegend(hlq.verification_categories||{});
+  render();
+})();
+</script>
+<script>
+/* ==================================================================== */
+/* ◄◄ map >>>  simple prevalence map  */
+/* ==================================================================== */
+let _centroids=null,   // {state|county lower-case ➜ {lat,lon}}
+    map, markerLayer;
+
+const MIN_R = 6;       
+const MAX_R = 22;     
+
+async function loadCentroids(){
+  if(_centroids) return;
+  const res = await fetch('county_centroids.json');
+  const rows = await res.json();
+  _centroids={};
+  rows.forEach(r=>{
+    const key=(r.state+"|"+r.county).toLowerCase();
+    _centroids[key]={lat:+r.lat, lon:+r.lon};
+  });
+}
+
+function buildMapIfNeeded(){
+  if(map) return;
+  map = L.map('map',{scrollWheelZoom:false,minZoom:3})
+         .setView([39.5,-98.35],4);          // USA
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap',
+  }).addTo(map);
+  markerLayer = L.layerGroup().addTo(map);
+}
+
+/* ---------- REPLACEMENT: updateMap ---------------------------------- */
+function updateMap(recs){
+  if(!recs.length) return;
+  buildMapIfNeeded();
+  markerLayer.clearLayers();
+
+  /* ── keep only the slice currently shown in the pie (if any) ── */
+  const filtered = currentSlice ? recs.filter(r=>r.category===currentSlice)
+                                : recs;
+
+  /* ---- counts per county ---- */
+  const counts={};                                     // key → n
+  filtered.forEach(r=>{
+    const key=(r.state+"|"+r.county).toLowerCase();
+    if(!_centroids?.[key]) return;                     // skip unknown county
+    counts[key]=(counts[key]||0)+1;
+  });
+  const vals=Object.values(counts);
+  if(!vals.length){ markerLayer.clearLayers(); return; }
+
+  const maxCnt=Math.max(...vals);
+
+  /* ---- draw circles ---- */
+  Object.entries(counts).forEach(([key,n])=>{
+    const {lat,lon}=_centroids[key];
+    /* radius scaled √n, but clamped */
+    let radius = MIN_R + (Math.sqrt(n)/Math.sqrt(maxCnt)) * (MAX_R-MIN_R);
+    radius = Math.max(MIN_R, Math.min(MAX_R, radius));
+
+    /* colour:  slice colour if filtered, else generic accent */
+    const colour = currentSlice ? (catColor[currentSlice]||'#005') : 'var(--accent)';
+
+    L.circleMarker([lat,lon],{
+      radius,
+      color: colour,
+      fillColor: colour,
+      fillOpacity: 0.35,
+      weight: 1,
+    })
+    .bindTooltip(`${key.split('|')[1]} Co.: ${n}`,{permanent:false})
+    .addTo(markerLayer);
+  });
+
+  /* optional auto-fit */
+  const pts = Object.keys(counts).map(k=>[_centroids[k].lat,_centroids[k].lon]);
+  map.fitBounds(pts,{padding:[30,30]});
+}
+
+/* ------- hook map into render() (unchanged except new param flow) --- */
+const _origRender = render;
+render = function(){
+  _origRender();
+  loadCentroids().then(()=>updateMap(byDate(original)));
+};
+
+$('#trendToggle').onclick = ()=>{
+  chartMode = (chartMode === 'pie') ? 'line' : 'pie';
+  $('#trendToggle').textContent =
+      (chartMode === 'pie') ? 'Show Trend Line' : 'Show Pie Chart';
+  currentSlice = null;                 // reset slice filter when switching modes
+  $('#resetCatBtn').classList.add('hidden');
+  render();
+};
+</script>
+<script>
+/* ---------- load Executive Summary markdown ---------- */
+(async()=>{
+  try{
+    const resp = await fetch('report.md');
+    if(!resp.ok) throw new Error(resp.statusText);
+    const md   = await resp.text();
+    $('#execSummary').innerHTML = marked.parse(md);
+  }catch(err){
+    console.warn('No report.md found → hiding Executive Summary');
+    document.getElementById('execSection').style.display='none';
+    document.getElementById('execSummary').style.display='none';
+    document.querySelector('h2:nth-of-type(3)').style.display='none';   /* hides the heading */
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+/* Blog-specific styles extracted from main site for consistency */
+    
+/* Blog-specific layout */
+.blog-post{max-width:800px;margin:0 auto;padding:0 20px 60px}
+.blog-header{padding:60px 20px 20px;text-align:center}
+.blog-title{font-size:2.5rem;color:#222;margin-bottom:20px}
+.blog-meta{font-size:.9rem;color:#666;margin-bottom:40px}
+.blog-content{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:40px;box-shadow:0 2px 6px rgba(0,0,0,0.05);text-align:left}
+    
+/* Blog post styling */
+.blog-content p{margin-bottom:16px}
+.blog-content h2{font-size:1.8rem;margin:30px 0 16px;padding-bottom:8px;border-bottom:2px solid #e0e0e0;color:#222}
+.blog-content h3{font-size:1.4rem;margin:24px 0 12px;color:#333}
+.blog-content ul,.blog-content ol{margin:0 0 20px 20px}
+.blog-content li{margin-bottom:8px}
+.blog-content blockquote{border-left:4px solid #0062cc;padding-left:20px;margin:20px 0;font-style:italic;color:#666}
+.blog-content code{background:#f4f4f4;padding:2px 4px;border-radius:3px;font-family:monospace;font-size:.9em}
+.blog-content pre{background:#f4f4f4;padding:20px;border-radius:8px;overflow-x:auto;margin:20px 0}
+.blog-content pre code{background:none;padding:0}
+    
+/* Navigation */
+.blog-nav{text-align:center;margin:40px 0}
+.blog-nav a{display:inline-block;padding:10px 20px;background:#0062cc;color:#fff;border-radius:6px;font-weight:500}
+.blog-nav a:hover{background:#004999;text-decoration:none}
+    
+/* Responsive */
+@media(max-width:768px){.blog-content{padding:24px}.blog-title{font-size:2rem}}

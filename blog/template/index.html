@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="description" content="Sample blog post about the power of data-driven research in civic analytics">
+  <title>Getting Started with Your First Blog Post - Noosphere Analytics Blog</title>
+  
+  <!-- Google Font (matching main site) -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Blog-specific styles -->
+  <style>
+    /* Global styles (matching main site) */
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Roboto',sans-serif;background:#f4f4f9;color:#333}
+    img{max-width:100%;height:auto;display:block}
+    a{color:#0062cc;text-decoration:none}
+    a:hover{text-decoration:underline}
+    h1,h2,h3,h4,h5,h6{margin:0;font-weight:500}
+    h2{font-size:2rem}
+    p{line-height:1.6;margin:0 0 16px}
+    
+    /* Blog-specific layout */
+    .blog-post{max-width:800px;margin:0 auto;padding:0 20px 60px}
+    .blog-header{padding:20px 20px 20px;text-align:center}
+    .blog-title{font-size:2.5rem;color:#222;margin-bottom:20px}
+    .blog-meta{font-size:.9rem;color:#666;margin-bottom:20px}
+    .blog-content{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:40px;box-shadow:0 2px 6px rgba(0,0,0,0.05);text-align:left}
+    
+    /* Blog post styling */
+    .blog-content p{margin-bottom:16px}
+    .blog-content h2{font-size:1.8rem;margin:30px 0 16px;padding-bottom:8px;border-bottom:2px solid #e0e0e0;color:#222}
+    .blog-content h3{font-size:1.4rem;margin:24px 0 12px;color:#333}
+    .blog-content ul,.blog-content ol{margin:0 0 20px 20px}
+    .blog-content li{margin-bottom:8px}
+    .blog-content blockquote{border-left:4px solid #0062cc;padding-left:20px;margin:20px 0;font-style:italic;color:#666}
+    .blog-content code{background:#f4f4f4;padding:2px 4px;border-radius:3px;font-family:monospace;font-size:.9em}
+    .blog-content pre{background:#f4f4f4;padding:20px;border-radius:8px;overflow-x:auto;margin:20px 0}
+    .blog-content pre code{background:none;padding:0}
+    
+    /* Navigation */
+    .blog-nav{text-align:center;margin:20px 0}
+    .blog-nav a{display:inline-block;padding:8px 16px;background:#0062cc;color:#fff;border-radius:4px;font-weight:500;font-size:.8em}
+    .blog-nav a:hover{background:#004999;text-decoration:none}
+    
+    /* Responsive */
+    @media(max-width:768px){.blog-content{padding:24px}.blog-title{font-size:2rem}}
+  </style>
+</head>
+<body>
+
+<!-- Logo (matching main site) -->
+<img src="../../../logo.png" alt="Noosphere Analytics Logo" style="width:150px;margin:20px auto"
+
+<!-- Blog Header -->
+<header class="blog-header">
+  <h1 class="blog-title">Getting Started with Your First Blog Post</h1>
+  <div class="blog-meta">
+    Published by Noosphere Analytics on January 1, 2025
+  </div>
+</header>
+
+<main class="blog-content">
+  <p>Welcome to your first blog post! This template shows you how to create and style blog content that matches the main site's appearance. You can copy this entire template directory to create new blog posts.</p>
+  
+  <h2>Simple HTML Formatting</h2>
+  
+  <p>Blog posts use basic HTML tags for formatting:</p>
+  
+  <ul>
+    <li><strong>Paragraphs:</strong> Wrap content in <code><p></code> tags</li>
+    <li><em>Emphasis:</strong> Use <code><em></code> for italic text</li>
+    <li><strong>Strong:</strong> Use <code><strong></code> for bold text</li>
+  </ul>
+  
+  <h2>Images and Links</h2>
+  
+  <p>Images work just like the main site:</p>
+  
+  <blockquote>
+    "Data-driven research in civic analytics combines computational methods with domain-specific knowledge to unlock insights from public documents."
+  </blockquote>
+  
+  <h3>Creating New Posts</h3>
+  
+  <p>To create a new blog post, follow these steps:</p>
+  
+  <ol>
+    <li>Copy the entire <code>blog/posts/template</code> directory</li>
+    <li>Rename it to your desired slug (e.g., <code>my-first-post</code>)</li>
+    <li>Edit the <code>index.html</code> file with your content</li>
+    <li>Run <code>./link.sh</code> to update the blog index</li>
+  </ol>
+  
+  <h3>Code Examples</h3>
+  
+  <pre><code>// This is a code block
+function createBlogPost(slug, content) {
+  const directory = `blog/posts/${slug}`;
+  // Copy template and update content
+  return generateIndex();
+}</code></pre>
+  
+  <h2>Styling Consistency</h2>
+  
+  <p>The blog inherits the same fonts, colors, and spacing as the main Noosphere Analytics site. This ensures a consistent user experience across all sections. The responsive design adapts to mobile devices automatically.</p>
+  
+  <p>Best practices for blog content:</p>
+  
+  <ul>
+    <li>Use semantic HTML elements</li>
+    <li>Keep paragraphs short and readable</li>
+    <li>Include relevant images when appropriate</li>
+    <li>Add meta descriptions for search engines</li>
+    <li>Use proper heading hierarchy</li>
+  </ul>
+  
+  <h3>Next Steps</h3>
+  
+  <p>Now that you've seen the template, you can start creating your own content. The beauty of this system is its simplicity: no databases, no CMS, just HTML files and a shell script to keep everything organized.</p>
+  
+  <p>Happy blogging!</p>
+</main>
+
+<div class="blog-nav">
+  <a href="../../index.html">← All Posts</a>
+</div>
+
+</body>
+</html>
