@@ -64,15 +64,17 @@
 
 	.hero-bg{
 	  position:absolute;inset:0;
-	  display:flex;justify-content:center;gap:40px;
+	  display:flex;
 	  opacity:0.30;                    /* base faintness of screenshots */
 	  mix-blend-mode:normal;
 	}
 
 	.hero-bg img{
 	  height:100%;
+	  width:100%;
 	  object-fit:cover;
-	  flex:0 0 400px;
+	  flex:1 1 0;
+	  min-width:0;
 	}
 
 	.hero-overlay{
