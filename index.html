@@ -324,9 +324,27 @@ and Twitter - and to make some fun contributions to the Firefox Web Browser.
   <!-- ========= FOOTER ========= -->
 	<footer class="legal">
 	</footer>
+
+  <!-- ========= INQUIRY MODAL (email decoded on click, not on page load, to deter scrapers) ========= -->
+  <div class="modal" id="inquiryModal">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeModal()">Close</button>
+      <p id="inquiryModalText"></p>
+    </div>
+  </div>
+
   <!-- ========= JS ========= -->
   <script>
-    function openModal(){document.getElementById('inquiryModal').style.display='flex'}
+    function openModal(){
+      var encoded = 'bmxxZGJtQ21sbHBza2ZxZmJtYm96d2pgcC1gbG4=';
+      var xored = atob(encoded);
+      var email = '';
+      for (var i = 0; i < xored.length; i++) {
+        email += String.fromCharCode(xored.charCodeAt(i) ^ 3);
+      }
+      document.getElementById('inquiryModalText').textContent = 'For inquiries e-mail me at ' + email;
+      document.getElementById('inquiryModal').style.display = 'flex';
+    }
     function closeModal(){document.getElementById('inquiryModal').style.display='none'}
   </script>
 </body>
